@@ -1,11 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
+    useLibrary 'org.apache.http.legacy'
     compileSdkVersion 23
     buildToolsVersion "23.0.1"
     defaultConfig {
         applicationId "ru.jehy.proxy_rutracker"
-        minSdkVersion 15
+        minSdkVersion 21
         targetSdkVersion 23
         versionName '1.23'
         versionCode 6
