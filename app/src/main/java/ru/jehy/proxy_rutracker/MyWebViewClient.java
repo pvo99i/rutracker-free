@@ -36,6 +36,7 @@ import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 class MyWebViewClient extends WebViewClient {
@@ -75,14 +76,18 @@ class MyWebViewClient extends WebViewClient {
     }
 
 
-
-
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
 
         Uri url = request.getUrl();
 
         Log.d("WebView", "Request for url: " + url + " intercepted");
+
+        if(url==null || url.getHost()==null)
+        {
+            Log.d("WebView", "No url or host provided, better let webview deal with it");
+            return super.shouldInterceptRequest(view, request);
+        }
 
         if (Utils.is_adv(url)) {
             Log.d("WebView", "Not fetching advertisment");
@@ -109,11 +114,8 @@ class MyWebViewClient extends WebViewClient {
             HttpResponse response;
             Map<String, String> headers = request.getRequestHeaders();
 
-            String l_username = request.getUrl().getQueryParameter("login_username");
-            String l_password = request.getUrl().getQueryParameter("login_password");
-            String login = request.getUrl().getQueryParameter("login");
-            if (request.getMethod().equals("GET"))//&& !url.contains("login.rutracker.org/forum/login.php")) {
-            {
+
+            if (request.getMethod().equals("GET") && !Utils.is_login_form(url)) {
                 HttpGet request1 = new HttpGet(url.toString());
 
                 for (Map.Entry<String, String> entry : headers.entrySet())
@@ -122,6 +124,7 @@ class MyWebViewClient extends WebViewClient {
                 request1.setHeader(header[0], header[1]);
                 request1.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
                 request1.setHeader("Accept-Encoding", "gzip");
+                //request1.setHeader("Host", "195.82.146.214");
                 request1.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36");
                 request1.setHeader("Accept-Encoding", "gzip");
                 request1.setHeader("Referer", "http://rutracker.org/forum/index.php");
@@ -132,14 +135,13 @@ class MyWebViewClient extends WebViewClient {
                 response = cli.execute(request1);
 
             } else {
+                Log.d("WebView", "WebviewClient: it is a post\\login request!");
+
                 HttpPost request1 = new HttpPost(url.toString());
-                if (login != null) {
-                    List<NameValuePair> nvps = new ArrayList<>();
-                    nvps.add(new BasicNameValuePair("login", login));
-                    nvps.add(new BasicNameValuePair("login_username", l_username));
-                    nvps.add(new BasicNameValuePair("login_password", l_password));
-                    request1.setEntity(new UrlEncodedFormEntity(nvps, "UTF-8"));
-                }
+                UrlEncodedFormEntity params = Utils.get2post(url);
+                if (params != null)
+                    request1.setEntity(params);
+
                 for (Map.Entry<String, String> entry : headers.entrySet())
                     request1.setHeader(entry.getKey(), entry.getValue());
                 request1.setHeader(header[0], header[1]);
@@ -148,14 +150,14 @@ class MyWebViewClient extends WebViewClient {
                 request1.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36");
                 request1.setHeader("Accept-Encoding", "gzip");
                 request1.setHeader("Referer", "http://rutracker.org/forum/index.php");
-                if (authCookie != null && (url.getHost().equals("rutracker.org") || url.getHost().equals("login.rutracker.org"))) {
+                if (authCookie != null && Utils.is_rutracker(url)) {
                     request1.setHeader("Cookie", authCookie);
                     Log.d("WebView", "cookie sent:" + authCookie);
                 }
                 response = cli.execute(request1);
             }
 
-            if (url.toString().startsWith("http://login.rutracker.org/forum/login.php")) {
+            if (Utils.is_login_form(url)) {
 
                 Header[] all = response.getAllHeaders();
                 for (Header header1 : all) {
@@ -202,14 +204,15 @@ class MyWebViewClient extends WebViewClient {
 
                 Log.d("WebView", "clean mime: " + mime);
                 Log.d("WebView", "encoding final: " + encoding);
-                if (url.getHost().contains("rutracker.org"))
+                if (Utils.is_rutracker(url))
                     encoding = "windows-1251";//for rutracker only, for mimes other then html
-                if (mime.equals("text/html") && url.getHost().contains("rutracker.org")) {
+                if (mime.equals("text/html") && Utils.is_rutracker(url)) {
                     encoding = "windows-1251";//for rutracker only
                     String data = Utils.convertStreamToString(inputStr, encoding);
-                    data = data.replace("id=\"top-login-form\" method=\"post", "id=\"top-login-form\" method=\"get");
+                    data = data.replace("method=\"post\"", "method=\"get\"");
+                    /*data = data.replace("id=\"top-login-form\" method=\"post", "id=\"top-login-form\" method=\"get");
                     data = data.replace("<form id=\"login-form\" action=\"http://login.rutracker.org/forum/login.php\" method=\"post\">",
-                            "<form id=\"login-form\" action=\"http://login.rutracker.org/forum/login.php\" method=\"get\">");
+                            "<form id=\"login-form\" action=\"http://login.rutracker.org/forum/login.php\" method=\"get\">");*/
                     inputStr = new ByteArrayInputStream(data.getBytes(encoding));
                     Log.d("WebView", "data " + data);
                 }
@@ -219,6 +222,12 @@ class MyWebViewClient extends WebViewClient {
             } else {
                 Log.d("WebView", "Response code: " + responseCode);
                 Log.d("WebView", "Response message: " + responseMessage);
+                String msgText = "Failed to fetch data:<br>Message: " + responseMessage +
+                        "<br>Code: " + responseCode + "<br>" +
+                        "<a href=\"javascript:location.reload(true)\">Refresh this page</a>";
+                ByteArrayInputStream msgStream = new ByteArrayInputStream(msgText.getBytes("UTF-8"));
+                return new WebResourceResponse("text/html", "UTF-8", msgStream);
+
 
             }
         } catch (Exception e) {

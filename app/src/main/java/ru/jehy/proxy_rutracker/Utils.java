@@ -4,6 +4,9 @@ import android.util.Log;
 import android.webkit.WebResourceResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.message.BasicNameValuePair;
 
 import android.net.Uri;
 
@@ -13,6 +16,9 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Bond on 2016-03-14.
@@ -104,5 +110,32 @@ public class Utils {
             e.printStackTrace();
         }
         return total.toString();
+    }
+
+    public static UrlEncodedFormEntity get2post(Uri url) {
+        Set<String> params = url.getQueryParameterNames();
+        if (params.isEmpty())
+            return null;
+
+        List<NameValuePair> paramsArray = new ArrayList<>();
+
+        for (String name : params) {
+            Log.d("Utils", "converting parameter " + name + " to post");
+            paramsArray.add(new BasicNameValuePair(name, url.getQueryParameter(name)));
+        }
+        try {
+            return new UrlEncodedFormEntity(paramsArray, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static boolean is_rutracker(Uri url) {
+        return ((url.getHost().equals("login.rutracker.org") || url.getHost().equals("rutracker.org")));
+    }
+
+    public static boolean is_login_form(Uri url) {
+        return (is_rutracker(url) && url.getPath().contains("forum/login.php"));
     }
 }

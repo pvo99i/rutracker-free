@@ -2,7 +2,10 @@ package ru.jehy.proxy_rutracker;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.webkit.WebView;
+
+import java.util.Arrays;
 
 /**
  * Created by Bond on 2016-03-12.
@@ -17,14 +20,13 @@ public class MyWebView extends WebView {
     }
     @Override
     public void loadUrl(String url) {
-        System.out.println("+++++WebView loadUrl:" + url);
         super.loadUrl(url);
 
     }
 
     @Override
     public void postUrl(String url, byte[] postData) {
-        System.out.println("+++++++WebView postUrl:" + url);
+        // fail, never works
         super.postUrl(url, postData);
     }
 };
