@@ -131,6 +131,7 @@ public class Utils {
         return null;
     }
 
+
     public static boolean is_rutracker(Uri url) {
         return ((url.getHost().equals("login.rutracker.org") || url.getHost().equals("rutracker.org")));
     }

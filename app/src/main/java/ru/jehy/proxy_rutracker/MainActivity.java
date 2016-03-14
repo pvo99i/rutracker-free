@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
         layout.addView(myWebView, new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT));
 
         //if (Build.VERSION.SDK_INT >= 21)
-        MyWebViewClient webClient = new MyWebViewClient((Context) this);
+        MyWebViewClient webClient = new MyWebViewClient(this);
         myWebView.setWebViewClient(webClient);
 
         //else

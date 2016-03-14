@@ -3,7 +3,6 @@ package ru.jehy.proxy_rutracker;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -14,7 +13,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
@@ -27,7 +25,6 @@ import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
@@ -36,21 +33,19 @@ import org.apache.http.protocol.HTTP;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.zip.GZIPInputStream;
+
 
 class MyWebViewClient extends WebViewClient {
 
     private String authCookie = null;
     private Context MainContext;
 
-    public MyWebViewClient(Context c)
-    {
-        MainContext=c;
+    public MyWebViewClient(Context c) {
+        MainContext = c;
     }
+
     public HttpClient getNewHttpClient() {
         try {
             KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -84,15 +79,12 @@ class MyWebViewClient extends WebViewClient {
     }
 
 
-    @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
 
         Uri url = request.getUrl();
-
         Log.d("WebView", "Request for url: " + url + " intercepted");
 
-        if(url==null || url.getHost()==null)
-        {
+        if (url == null || url.getHost() == null) {
             Log.d("WebView", "No url or host provided, better let webview deal with it");
             return super.shouldInterceptRequest(view, request);
         }
@@ -131,16 +123,25 @@ class MyWebViewClient extends WebViewClient {
 
                 request1.setHeader(header[0], header[1]);
                 request1.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
-                request1.setHeader("Accept-Encoding", "gzip");
-                //request1.setHeader("Host", "195.82.146.214");
-                request1.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36");
-                request1.setHeader("Accept-Encoding", "gzip");
-                request1.setHeader("Referer", "http://rutracker.org/forum/index.php");
-                if (authCookie != null && (url.getHost().equals("rutracker.org") || url.getHost().equals("login.rutracker.org"))) {
+                request1.setHeader("Accept-Encoding", "gzip, deflate, sdch");
+                request1.setHeader("Accept-Language", "ru,en-US;q=0.8,en;q=0.6");
+                if (authCookie != null && Utils.is_rutracker(url)) {
                     request1.setHeader("Cookie", authCookie);
                     Log.d("WebView", "cookie sent:" + authCookie);
                 }
-                response = cli.execute(request1);
+                request1.setHeader("Referer", "http://rutracker.org/forum/index.php");
+                request1.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36");
+
+                try {
+                    response = cli.execute(request1);
+                } catch (Exception e) {
+
+                    String msgText = "Failed to fetch data:<br>Message: " + e.getMessage() +
+                            "<br>" +
+                            "<a href=\"javascript:location.reload(true)\">Refresh this page</a>";
+                    ByteArrayInputStream msgStream = new ByteArrayInputStream(msgText.getBytes("UTF-8"));
+                    return new WebResourceResponse("text/html", "UTF-8", msgStream);
+                }
 
             } else {
                 Log.d("WebView", "WebviewClient: it is a post\\login request!");
@@ -154,14 +155,15 @@ class MyWebViewClient extends WebViewClient {
                     request1.setHeader(entry.getKey(), entry.getValue());
                 request1.setHeader(header[0], header[1]);
                 request1.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
-                request1.setHeader("Accept-Encoding", "gzip");
-                request1.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36");
-                request1.setHeader("Accept-Encoding", "gzip");
-                request1.setHeader("Referer", "http://rutracker.org/forum/index.php");
+                request1.setHeader("Accept-Encoding", "gzip, deflate, sdch");
+                request1.setHeader("Accept-Language", "ru,en-US;q=0.8,en;q=0.6");
                 if (authCookie != null && Utils.is_rutracker(url)) {
                     request1.setHeader("Cookie", authCookie);
                     Log.d("WebView", "cookie sent:" + authCookie);
                 }
+                request1.setHeader("Referer", "http://rutracker.org/forum/index.php");
+                request1.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36");
+
                 response = cli.execute(request1);
             }
 
@@ -174,15 +176,26 @@ class MyWebViewClient extends WebViewClient {
                 }
                 Header[] cookies = response.getHeaders("set-cookie");
                 if (cookies.length > 0) {
-                    Header cookie = cookies[0];
-                    String val = cookie.getValue();
+                    String val = cookies[0].getValue();
                     val = val.substring(0, val.indexOf(";"));
-                    Log.d("WebView", "=== Auth cookie: ===" + val);
-                    authCookie = val;
+                    authCookie = val.trim();
+                    Log.d("WebView", "=== Auth cookie: ==='" + val + "'");
+                    //redirect does not work o_O
+                    String msgText = "<script>window.location = \"http://rutracker.org/forum/index.php\"</script>";
+                    ByteArrayInputStream msgStream = new ByteArrayInputStream(msgText.getBytes("UTF-8"));
+                    return new WebResourceResponse("text/html", "UTF-8", msgStream);
+
                 }
             }
             int responseCode = response.getStatusLine().getStatusCode();
             String responseMessage = response.getStatusLine().getReasonPhrase();
+            if (responseCode == 302) {
+                Log.d("WebView", "It is redirect!");
+                Header[] locHeaders = response.getHeaders("location");
+                String newLocation = locHeaders[0].getValue();
+                Log.d("WebView", "going to " + newLocation);
+                return this.shouldInterceptRequest(view, newLocation);
+            }
 
             if (responseCode == 200) {
                 InputStream input = response.getEntity().getContent();
@@ -224,14 +237,13 @@ class MyWebViewClient extends WebViewClient {
                     inputStr = new ByteArrayInputStream(data.getBytes(encoding));
                     Log.d("WebView", "data " + data);
 
-                    String shareMsg="Посмотри, что я нашёл на рутрекере при помощи приложения rutracker free: \n"+url.toString();
-                    int start=data.indexOf("href=\"magnet:");
-                    if(start!=-1)
-                    {
-                        start+=13;
-                        int end=data.indexOf("\"",start);
-                        String link=data.substring(start,end);
-                        shareMsg+="\n\nMagnet ссылка на скачивание:\nmagnet:"+link;
+                    String shareMsg = "Посмотри, что я нашёл на рутрекере при помощи приложения rutracker free: \n" + url.toString();
+                    int start = data.indexOf("href=\"magnet:");
+                    if (start != -1) {
+                        start += 13;
+                        int end = data.indexOf("\"", start);
+                        String link = data.substring(start, end);
+                        shareMsg += "\n\nMagnet ссылка на скачивание:\nmagnet:" + link;
                     }
                     Intent mShareIntent = new Intent();
                     mShareIntent.setAction(Intent.ACTION_SEND);

@@ -8,8 +8,8 @@ android {
         applicationId "ru.jehy.proxy_rutracker"
         minSdkVersion 21
         targetSdkVersion 23
-        versionName '1.23'
-        versionCode 6
+        versionName '0.1'
+        versionCode 1
     }
     buildTypes {
         release {
