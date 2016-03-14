@@ -1,6 +1,9 @@
 package ru.jehy.proxy_rutracker;
 
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -41,8 +44,13 @@ import java.util.zip.GZIPInputStream;
 
 class MyWebViewClient extends WebViewClient {
 
-    String authCookie = null;
+    private String authCookie = null;
+    private Context MainContext;
 
+    public MyWebViewClient(Context c)
+    {
+        MainContext=c;
+    }
     public HttpClient getNewHttpClient() {
         try {
             KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -215,6 +223,26 @@ class MyWebViewClient extends WebViewClient {
                             "<form id=\"login-form\" action=\"http://login.rutracker.org/forum/login.php\" method=\"get\">");*/
                     inputStr = new ByteArrayInputStream(data.getBytes(encoding));
                     Log.d("WebView", "data " + data);
+
+                    String shareMsg="Посмотри, что я нашёл на рутрекере при помощи приложения rutracker free: \n"+url.toString();
+                    int start=data.indexOf("href=\"magnet:");
+                    if(start!=-1)
+                    {
+                        start+=13;
+                        int end=data.indexOf("\"",start);
+                        String link=data.substring(start,end);
+                        shareMsg+="\n\nMagnet ссылка на скачивание:\nmagnet:"+link;
+                    }
+                    Intent mShareIntent = new Intent();
+                    mShareIntent.setAction(Intent.ACTION_SEND);
+                    mShareIntent.setType("text/plain");
+                    mShareIntent.putExtra(Intent.EXTRA_TEXT, shareMsg);
+                    ((MainActivity) MainContext).setShareIntent(mShareIntent);
+
+                    //MainActivity.setShareIntent(mShareIntent);
+                    //((MainActivity)view.getContext()).setShareIntent(mShareIntent);
+                    //((MainActivity)getActivity()).yourPublicMethod();
+
                 }
                 return new WebResourceResponse(mime, encoding, inputStr);
 

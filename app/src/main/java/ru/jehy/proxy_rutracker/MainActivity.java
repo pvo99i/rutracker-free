@@ -2,11 +2,17 @@ package ru.jehy.proxy_rutracker;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.WebSettings;
@@ -23,6 +29,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SuppressLint("SetJavaScriptEnabled")
 public class MainActivity extends AppCompatActivity {
     private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
+    public ShareActionProvider mShareActionProvider;
+    private MyWebViewClient webClient;
     private int ViewId;
 
     /**
@@ -44,10 +52,44 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.actionbar, menu);
+        // Return true so Android will know we want to display the menu
+        //Menu menu=(Menu) findViewById(R.id.);;
+        //MenuItem item = (MenuItem)findViewById(R.id.menu_item_share);//myToolbar.findItem(R.id.menu_item_share);
+
+        // Fetch and store ShareActionProvider
+        //mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+        //MenuC
+        MenuItem item = menu.findItem(R.id.menu_item_share);
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+
+        //mShareActionProvider = (ShareActionProvider) item.getActionProvider();
+        return true;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+
         RunWebView();
+    }
+
+    public void setShareIntent(final Intent shareIntent) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mShareActionProvider != null) {
+                    mShareActionProvider.setShareIntent(shareIntent);
+                }
+
+            }
+        });
     }
 
     public void RunWebView() {
@@ -69,11 +111,13 @@ public class MainActivity extends AppCompatActivity {
 
         }
         myWebView.getSettings().setJavaScriptEnabled(true);
-        RelativeLayout layout = (RelativeLayout) findViewById(R.id.mainLayout);
+        RelativeLayout layout = (RelativeLayout) findViewById(R.id.contentLayout);
         layout.addView(myWebView, new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT));
 
         //if (Build.VERSION.SDK_INT >= 21)
-        myWebView.setWebViewClient(new MyWebViewClient());
+        MyWebViewClient webClient = new MyWebViewClient((Context) this);
+        myWebView.setWebViewClient(webClient);
+
         //else
         //    myWebView.setWebViewClient(new MyWebViewClientOld());
 
