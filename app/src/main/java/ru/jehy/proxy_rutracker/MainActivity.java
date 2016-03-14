@@ -23,15 +23,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SuppressLint("SetJavaScriptEnabled")
 public class MainActivity extends AppCompatActivity {
     private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
+    private int ViewId;
 
     /**
-     * Generate a value suitable for use in {@link #setId(int)}.
+     * Generate a value suitable for use in setId(int).
      * This value will not collide with ID values generated at build time by aapt for R.id.
      *
      * @return a generated ID value
      */
-    public static int generateViewId() {
-        for (;;) {
+    public int generateViewId() {
+        for (; ; ) {
             final int result = sNextGeneratedId.get();
             // aapt-generated IDs have the high byte nonzero; clamp to the range under that.
             int newValue = result + 1;
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,19 +57,23 @@ public class MainActivity extends AppCompatActivity {
         //myWebView.setId(R.id.webView);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
 
-            myWebView.setId(this.generateViewId());
+            {
+                ViewId = this.generateViewId();
+                myWebView.setId(ViewId);
+
+            }
 
         } else {
-
-            myWebView.setId(View.generateViewId());
+            ViewId = View.generateViewId();
+            myWebView.setId(ViewId);
 
         }
         myWebView.getSettings().setJavaScriptEnabled(true);
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.mainLayout);
-        layout.addView(myWebView, new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT,RelativeLayout.LayoutParams.FILL_PARENT));
+        layout.addView(myWebView, new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT));
 
         //if (Build.VERSION.SDK_INT >= 21)
-            myWebView.setWebViewClient(new MyWebViewClient());
+        myWebView.setWebViewClient(new MyWebViewClient());
         //else
         //    myWebView.setWebViewClient(new MyWebViewClientOld());
 
@@ -93,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_BACK:
-                    WebView myWebView = (WebView) findViewById(R.id.webView);
+                    WebView myWebView = (WebView) findViewById(ViewId);
                     if (myWebView.canGoBack()) {
                         myWebView.goBack();
                     } else {
