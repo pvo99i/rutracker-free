@@ -1,2 +1,2 @@
-# Charsheet.su-android-client
-Android application which uses webview to show site content and allows authorisation via device accounts.
+# rutracker-free
+Android thin client for rutracker.org, using google compression proxy to avoid block.
