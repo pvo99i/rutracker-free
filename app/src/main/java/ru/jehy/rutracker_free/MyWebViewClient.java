@@ -139,22 +139,22 @@ class MyWebViewClient extends WebViewClient {
                 try {
                     response = cli.execute(request1);
                 } catch (Exception e) {
-
-                    String msgText = "Failed to fetch data:<br>Message: " + e.getMessage() +
-                            "<br>" +
-                            "<a href=\"javascript:location.reload(true)\">Refresh this page</a>";
+                    String msgText = "Что-то пошло не так:<br>Сообщение: " + e.getMessage() +
+                            "<br>Код: " +
+                            "Вы можете <a href=\"javascript:location.reload(true)\">Обновить страницу</a>" +
+                            "или <a href=\"http://rutracker.org/forum/index.php\">вернуться на главную</a>";
                     ByteArrayInputStream msgStream = new ByteArrayInputStream(msgText.getBytes("UTF-8"));
                     return new WebResourceResponse("text/html", "UTF-8", msgStream);
                 }
 
             } else {
                 Log.d("WebView", "WebviewClient: it is a post\\login request!");
-                int queryPart=url.toString().indexOf("?");
+                int queryPart = url.toString().indexOf("?");
                 String urlWithStrippedGet;
-                if(queryPart!=-1)
-                    urlWithStrippedGet=url.toString().substring(0,queryPart);
+                if (queryPart != -1)
+                    urlWithStrippedGet = url.toString().substring(0, queryPart);
                 else
-                    urlWithStrippedGet=url.toString();
+                    urlWithStrippedGet = url.toString();
 
                 HttpPost request1 = new HttpPost(urlWithStrippedGet);
                 UrlEncodedFormEntity params = Utils.get2post(url);
@@ -269,9 +269,10 @@ class MyWebViewClient extends WebViewClient {
             } else {
                 Log.d("WebView", "Response code: " + responseCode);
                 Log.d("WebView", "Response message: " + responseMessage);
-                String msgText = "Failed to fetch data:<br>Message: " + responseMessage +
-                        "<br>Code: " + responseCode + "<br>" +
-                        "<a href=\"javascript:location.reload(true)\">Refresh this page</a>";
+                String msgText = "Что-то пошло не так:<br>Сообщение: " + responseMessage +
+                        "<br>Код: " + responseCode + "<br>" +
+                        "Вы можете <a href=\"javascript:location.reload(true)\">Обновить страницу</a>" +
+                        "или <a href=\"http://rutracker.org/forum/index.php\">вернуться на главную</a>";
                 ByteArrayInputStream msgStream = new ByteArrayInputStream(msgText.getBytes("UTF-8"));
                 return new WebResourceResponse("text/html", "UTF-8", msgStream);
 
