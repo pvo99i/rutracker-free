@@ -1,7 +1,6 @@
-package ru.jehy.proxy_rutracker;
+package ru.jehy.rutracker_free;
 
 import android.util.Log;
-import android.webkit.WebResourceResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;

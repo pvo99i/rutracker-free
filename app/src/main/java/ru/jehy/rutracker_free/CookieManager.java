@@ -1,4 +1,4 @@
-package ru.jehy.proxy_rutracker;
+package ru.jehy.rutracker_free;
 
 /**
  * Created by Bond on 2016-03-14.

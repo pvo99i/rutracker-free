@@ -1,11 +1,8 @@
-package ru.jehy.proxy_rutracker;
+package ru.jehy.rutracker_free;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.webkit.WebView;
-
-import java.util.Arrays;
 
 /**
  * Created by Bond on 2016-03-12.

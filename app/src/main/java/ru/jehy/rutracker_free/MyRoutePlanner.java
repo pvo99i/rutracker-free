@@ -1,4 +1,4 @@
-package ru.jehy.proxy_rutracker;
+package ru.jehy.rutracker_free;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;

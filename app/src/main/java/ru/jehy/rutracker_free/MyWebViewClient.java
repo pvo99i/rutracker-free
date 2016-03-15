@@ -1,8 +1,10 @@
-package ru.jehy.proxy_rutracker;
+package ru.jehy.rutracker_free;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -32,19 +34,17 @@ import org.apache.http.protocol.HTTP;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 
-class MyWebViewClientOld extends WebViewClient {
+class MyWebViewClient extends WebViewClient {
 
     private String authCookie = null;
     private Context MainContext;
 
-    public MyWebViewClientOld(Context c) {
+    public MyWebViewClient(Context c) {
         MainContext = c;
         authCookie = CookieManager.get(MainContext);
     }
@@ -82,15 +82,15 @@ class MyWebViewClientOld extends WebViewClient {
     }
 
 
-    public WebResourceResponse shouldInterceptRequest(WebView view, String urlString) {
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
 
-        Log.d("WebView", "Request for url: " + urlString + " intercepted");
-        Uri url = Uri.parse(urlString);
+        Uri url = request.getUrl();
+        Log.d("WebView", "Request for url: " + url + " intercepted");
 
-        Uri h=new Uri.Builder().build();
         if (url == null || url.getHost() == null) {
             Log.d("WebView", "No url or host provided, better let webview deal with it");
-            return super.shouldInterceptRequest(view, urlString);
+            return super.shouldInterceptRequest(view, request);
         }
 
         if (Utils.is_adv(url)) {
@@ -100,11 +100,11 @@ class MyWebViewClientOld extends WebViewClient {
 
         if (url.getScheme().equals("https")) {
             Log.d("WebView", "Not proxying url with HTTPS, it won't work on google proxy. Gonna fetch it directly.");
-            return super.shouldInterceptRequest(view, urlString);
+            return super.shouldInterceptRequest(view, request);
         }
         if (url.getHost().equals("google.com") || url.getHost().equals("www.google.com")) {
             Log.d("WebView", "Not trying to proxy google scripts");
-            return super.shouldInterceptRequest(view, urlString);
+            return super.shouldInterceptRequest(view, request);
         }
         // if (url.length() != 0) {
         try {
@@ -116,10 +116,14 @@ class MyWebViewClientOld extends WebViewClient {
             HttpClient cli = getNewHttpClient();
             cli.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
             HttpResponse response;
+            Map<String, String> headers = request.getRequestHeaders();
 
 
-            if (!Utils.is_login_form(url)) {
+            if (request.getMethod().equals("GET") && !Utils.is_login_form(url)) {
                 HttpGet request1 = new HttpGet(url.toString());
+
+                for (Map.Entry<String, String> entry : headers.entrySet())
+                    request1.setHeader(entry.getKey(), entry.getValue());
 
                 request1.setHeader(header[0], header[1]);
                 request1.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
@@ -151,6 +155,8 @@ class MyWebViewClientOld extends WebViewClient {
                 if (params != null)
                     request1.setEntity(params);
 
+                for (Map.Entry<String, String> entry : headers.entrySet())
+                    request1.setHeader(entry.getKey(), entry.getValue());
                 request1.setHeader(header[0], header[1]);
                 request1.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
                 request1.setHeader("Accept-Encoding", "gzip, deflate, sdch");

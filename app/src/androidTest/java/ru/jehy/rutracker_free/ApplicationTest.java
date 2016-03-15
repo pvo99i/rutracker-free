@@ -1,4 +1,4 @@
-package ru.jehy.proxy_rutracker;
+package ru.jehy.rutracker_free;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
