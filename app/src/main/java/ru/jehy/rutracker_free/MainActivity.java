@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MainActivity extends AppCompatActivity {
     private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
     public ShareActionProvider mShareActionProvider;
-    private MyWebViewClient webClient;
     private int ViewId;
 
     /**
