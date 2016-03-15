@@ -141,8 +141,14 @@ class MyWebViewClientOld extends WebViewClient {
 
             } else {
                 Log.d("WebView", "WebviewClient: it is a post\\login request!");
+                int queryPart=url.toString().indexOf("?");
+                String urlWithStrippedGet;
+                if(queryPart!=-1)
+                    urlWithStrippedGet=url.toString().substring(0,queryPart);
+                else
+                    urlWithStrippedGet=url.toString();
 
-                HttpPost request1 = new HttpPost(url.toString());
+                HttpPost request1 = new HttpPost(urlWithStrippedGet);
                 UrlEncodedFormEntity params = Utils.get2post(url);
                 if (params != null)
                     request1.setEntity(params);
@@ -245,10 +251,6 @@ class MyWebViewClientOld extends WebViewClient {
                     mShareIntent.setType("text/plain");
                     mShareIntent.putExtra(Intent.EXTRA_TEXT, shareMsg);
                     ((MainActivity) MainContext).setShareIntent(mShareIntent);
-
-                    //MainActivity.setShareIntent(mShareIntent);
-                    //((MainActivity)view.getContext()).setShareIntent(mShareIntent);
-                    //((MainActivity)getActivity()).yourPublicMethod();
 
                 }
                 return new WebResourceResponse(mime, encoding, inputStr);
