@@ -9,9 +9,6 @@ import android.webkit.WebView;
  */
 
 public class MyWebView extends WebView {
-    public MyWebView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
     public MyWebView(Context context) {
         super(context);
     }
