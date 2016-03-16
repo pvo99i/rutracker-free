@@ -33,6 +33,7 @@ import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.util.Map;
@@ -106,7 +107,18 @@ class MyWebViewClient extends WebViewClient {
             Log.d("WebView", "Not trying to proxy google scripts");
             return super.shouldInterceptRequest(view, request);
         }
-        // if (url.length() != 0) {
+        if (url.getPath().equals("/custom.css")) {
+            Log.d("WebView", "Adding custom css file...");
+
+            // please try to test this
+            return new WebResourceResponse("text/css", "UTF-8", null);
+
+            /*try {
+                return new WebResourceResponse("text/css", "UTF-8", (MainContext).getAssets().open("rutracker.css"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }*/
+        }
         try {
             String[] header = Utils.authHeader();
             Log.d("WebView", header[0] + " : " + header[1]);
@@ -242,9 +254,9 @@ class MyWebViewClient extends WebViewClient {
                     encoding = "windows-1251";//for rutracker only
                     String data = Utils.convertStreamToString(inputStr, encoding);
                     data = data.replace("method=\"post\"", "method=\"get\"");
-                    /*data = data.replace("id=\"top-login-form\" method=\"post", "id=\"top-login-form\" method=\"get");
-                    data = data.replace("<form id=\"login-form\" action=\"http://login.rutracker.org/forum/login.php\" method=\"post\">",
-                            "<form id=\"login-form\" action=\"http://login.rutracker.org/forum/login.php\" method=\"get\">");*/
+                    data = data.replace("</head>", "<link rel=\"stylesheet\" href=\"/custom.css\" type=\"text/css\"></head>");
+                    //String cssData = Utils.convertStreamToString((MainContext).getAssets().open("rutracker.css"), "UTF-8");
+                    //data = data.replace("</body>", "<style>" + cssData+"</style></body>");
                     inputStr = new ByteArrayInputStream(data.getBytes(encoding));
                     Log.d("WebView", "data " + data);
 
