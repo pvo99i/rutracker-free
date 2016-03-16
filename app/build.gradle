@@ -1,3 +1,5 @@
+//        releaseVersionCode 2
+
 apply plugin: 'com.android.application'
 
 android {
