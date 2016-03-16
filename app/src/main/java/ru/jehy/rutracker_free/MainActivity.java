@@ -1,10 +1,14 @@
 package ru.jehy.rutracker_free;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
@@ -18,6 +22,12 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.RelativeLayout;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -25,6 +35,41 @@ public class MainActivity extends AppCompatActivity {
     private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
     public ShareActionProvider mShareActionProvider;
     private int ViewId;
+
+    public void Update(final Integer lastAppVersion) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setMessage("Доступно обновление приложения rutracker free до версии " +
+                        lastAppVersion + " - желаете обновиться? " +
+                        "Если вы согласны - вы будете перенаправлены к скачиванию APK файла,"
+                        +" который затем нужно будет открыть.")
+                        .setCancelable(true)
+                        .setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Intent intent = new Intent(Intent.ACTION_VIEW);
+                                String apkUrl = "https://github.com/jehy/rutracker-free/releases/download/" +
+                                        lastAppVersion + "/app-release.apk";
+                                //intent.setDataAndType(Uri.parse(apkUrl), "application/vnd.android.package-archive");
+                                intent.setData(Uri.parse(apkUrl));
+
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                                dialog.dismiss();
+                            }
+                        })
+                        .setNegativeButton("Нет", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                SettingsManager.put(MainActivity.this, "LastIgnoredUpdateVersion", lastAppVersion.toString());
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+        });
+    }
 
     /**
      * Generate a value suitable for use in setId(int).
@@ -56,8 +101,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        new Updater().execute(this);
         setContentView(R.layout.activity_main);
-
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
@@ -91,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
         }
         myWebView.getSettings().setJavaScriptEnabled(true);
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.contentLayout);
+        assert layout != null;
         layout.addView(myWebView, new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT));
 
         if (Build.VERSION.SDK_INT >= 21) {
@@ -106,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
         myWebView.getSettings().setDisplayZoomControls(false);
         CookieManager.getInstance().setAcceptCookie(true);
         String url = "http://rutracker.org/forum/index.php";
-        Log.d("RunWebView", "Opening: " + url);
+        Log.d("Rutracker free", "Opening: " + url);
         myWebView.loadUrl(url);
     }
 
@@ -116,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_BACK:
                     WebView myWebView = (WebView) findViewById(ViewId);
+                    assert myWebView != null;
                     if (myWebView.canGoBack()) {
                         myWebView.goBack();
                     } else {
