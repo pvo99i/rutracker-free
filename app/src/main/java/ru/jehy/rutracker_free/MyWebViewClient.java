@@ -111,13 +111,13 @@ class MyWebViewClient extends WebViewClient {
             Log.d("WebView", "Adding custom css file...");
 
             // please try to test this
-            return new WebResourceResponse("text/css", "UTF-8", null);
+            //return new WebResourceResponse("text/css", "UTF-8", null);
 
-            /*try {
+            try {
                 return new WebResourceResponse("text/css", "UTF-8", (MainContext).getAssets().open("rutracker.css"));
             } catch (IOException e) {
                 e.printStackTrace();
-            }*/
+            }
         }
         try {
             String[] header = Utils.authHeader();
