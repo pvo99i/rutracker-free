@@ -30,6 +30,7 @@ import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.util.zip.GZIPInputStream;
@@ -102,7 +103,19 @@ class MyWebViewClientOld extends WebViewClient {
             Log.d("WebView", "Not trying to proxy google scripts");
             return super.shouldInterceptRequest(view, urlString);
         }
-        // if (url.length() != 0) {
+
+        if (url.getPath().equals("/custom.css")) {
+            Log.d("WebView", "Adding custom css file...");
+
+            // please try to test this
+            //return new WebResourceResponse("text/css", "UTF-8", null);
+
+            try {
+                return new WebResourceResponse("text/css", "UTF-8", (MainContext).getAssets().open("rutracker.css"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         try {
             String[] header = Utils.authHeader();
             Log.d("WebView", header[0] + " : " + header[1]);
@@ -226,12 +239,13 @@ class MyWebViewClientOld extends WebViewClient {
 
                 Log.d("WebView", "clean mime: " + mime);
                 Log.d("WebView", "encoding final: " + encoding);
-                if (Utils.is_rutracker(url))
+                if (Utils.is_rutracker(url) || url.toString().contains("static.t-ru.org"))
                     encoding = "windows-1251";//for rutracker only, for mimes other then html
                 if (mime.equals("text/html") && Utils.is_rutracker(url)) {
                     encoding = "windows-1251";//for rutracker only
                     String data = Utils.convertStreamToString(inputStr, encoding);
                     data = data.replace("method=\"post\"", "method=\"get\"");
+                    data = data.replace("</head>", "<link rel=\"stylesheet\" href=\"/custom.css\" type=\"text/css\"></head>");
                     /*data = data.replace("id=\"top-login-form\" method=\"post", "id=\"top-login-form\" method=\"get");
                     data = data.replace("<form id=\"login-form\" action=\"http://login.rutracker.org/forum/login.php\" method=\"post\">",
                             "<form id=\"login-form\" action=\"http://login.rutracker.org/forum/login.php\" method=\"get\">");*/
