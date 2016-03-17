@@ -247,9 +247,11 @@ class MyWebViewClient extends WebViewClient {
                     encoding = "UTF-8";
 
                 Log.d("WebView", "clean mime: " + mime);
-                Log.d("WebView", "encoding final: " + encoding);
-                if (Utils.is_rutracker(url))
+                if (Utils.is_rutracker(url)||url.toString().contains("static.t-ru.org"))
                     encoding = "windows-1251";//for rutracker only, for mimes other then html
+
+                Log.d("WebView", "encoding final: " + encoding);
+
                 if (mime.equals("text/html") && Utils.is_rutracker(url)) {
                     encoding = "windows-1251";//for rutracker only
                     String data = Utils.convertStreamToString(inputStr, encoding);
