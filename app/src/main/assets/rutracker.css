@@ -39,3 +39,6 @@ td.tCenter.pad_2 > div, td.tRight.w50 > div
 a.med, a.small, a.gensmall, .branding .topmenu td:last-child div a, .branding .topmenu td:last-child div .a-like {color: #006699!important;}
 
 .branding .topmenu td:last-child div a:hover, .branding .topmenu td:last-child div .a-like:hover {color: #DD6900!important;}
+
+/*устранение ограничения по ширине поста*/
+div.post_wrap{max-width:1000px!important;}
