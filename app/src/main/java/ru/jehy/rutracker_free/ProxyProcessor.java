@@ -210,8 +210,8 @@ public class ProxyProcessor {
                     String msgText = "<script>window.location = \"http://rutracker.org/forum/index.php\"</script>";
                     ByteArrayInputStream msgStream = new ByteArrayInputStream(msgText.getBytes("UTF-8"));
                     return new WebResourceResponse("text/html", "UTF-8", msgStream);
-
-                }
+                } else
+                    Log.d("WebView", "No cookie received!!!");
             }
             int responseCode = response.getStatusLine().getStatusCode();
             String responseMessage = response.getStatusLine().getReasonPhrase();
@@ -259,12 +259,10 @@ public class ProxyProcessor {
                     encoding = "windows-1251";//for rutracker only
                     String data = Utils.convertStreamToString(inputStr, encoding);
                     //data = data.replace("method=\"post\"", "method=\"get\"");
-                    String replace = "<form(.+?)method=\"post\"(.+?)>";
+                    String replace = "<form(.*?)method=\"post\"(.*?)>";
                     String replacement = "<form$1method=\"get\"$2><input type=\"hidden\" name=\"convert_post\" value=1>";
                     data = data.replaceAll(replace, replacement);
                     data = data.replace("</head>", "<link rel=\"stylesheet\" href=\"/custom.css\" type=\"text/css\"></head>");
-                    //String cssData = Utils.convertStreamToString((MainContext).getAssets().open("rutracker.css"), "UTF-8");
-                    //data = data.replace("</body>", "<style>" + cssData+"</style></body>");
                     inputStr = new ByteArrayInputStream(data.getBytes(encoding));
                     Log.d("WebView", "data " + data);
                     String shareUrl = url.toString();

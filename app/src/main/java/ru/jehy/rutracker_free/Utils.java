@@ -119,18 +119,18 @@ public class Utils {
         }
         return total.toString();
     }
-    public static Map<String, String> getQueryMap(String query)
-    {
+
+    public static Map<String, String> getQueryMap(String query) {
         String[] params = query.split("&");
         Map<String, String> map = new HashMap<String, String>();
-        for (String param : params)
-        {
+        for (String param : params) {
             String name = param.split("=")[0];
             String value = param.split("=")[1];
             map.put(name, value);
         }
         return map;
     }
+
     public static UrlEncodedFormEntity get2post(Uri url) {
         Set<String> params = url.getQueryParameterNames();
         if (params.isEmpty())
@@ -139,13 +139,12 @@ public class Utils {
         List<NameValuePair> paramsArray = new ArrayList<>();
 
         Log.d("Utils", "Getting URL parameters from URL " + url.toString());
-        String urlStr= null;
+        String urlStr = null;
 
-        Map<String, String> map=getQueryMap(url.toString());
-        for (Map.Entry<String, String> entry : map.entrySet())
-        {
-            String name=entry.getKey();
-            String value=entry.getValue();
+        Map<String, String> map = getQueryMap(url.toString());
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            String name = entry.getKey();
+            String value = entry.getValue();
             try {
                 value = URLDecoder.decode(value, "windows-1251");
             } catch (UnsupportedEncodingException e) {
@@ -164,7 +163,12 @@ public class Utils {
 
 
     public static boolean is_rutracker(Uri url) {
-        return ((url.getHost().equals("login.rutracker.org") || url.getHost().equals("rutracker.org")));
+        String host = url.getHost();
+        return ((host.equals("login.rutracker.org")
+                || host.equals("rutracker.org")
+                || host.equals("post.rutracker.org")
+                || host.equals("rutracker.wiki")
+        ));
     }
 
     public static boolean is_login_form(Uri url) {
