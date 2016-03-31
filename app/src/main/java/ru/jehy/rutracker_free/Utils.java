@@ -167,7 +167,7 @@ public class Utils {
         return ((host.equals("login.rutracker.org")
                 || host.equals("rutracker.org")
                 || host.equals("post.rutracker.org")
-                || host.equals("rutracker.wiki")
+                //|| host.equals("rutracker.wiki") //does not require auth and not 1251
         ));
     }
 
