@@ -34,6 +34,7 @@ import org.apache.http.protocol.HTTP;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.security.KeyStore;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -93,7 +94,7 @@ public class ProxyProcessor {
 
         Log.d("WebView", "Request for url: " + url + " intercepted");
 
-        if (url == null || url.getHost() == null) {
+        if (url.getHost() == null) {
             Log.d("WebView", "No url or host provided, better let webview deal with it");
             return null;
         }
@@ -134,7 +135,7 @@ public class ProxyProcessor {
             HttpResponse response;
 
 
-            if (method.equals("GET") && !Utils.is_login_form(url)) {
+            if (!url.toString().contains("convert_post=1") && !method.equals("post")) {
                 HttpGet request1 = new HttpGet(url.toString());
 
                 for (Map.Entry<String, String> entry : headers.entrySet())
@@ -163,13 +164,11 @@ public class ProxyProcessor {
                 }
 
             } else {
-                Log.d("WebView", "WebviewClient: it is a post\\login request!");
-                int queryPart = url.toString().indexOf("?");
-                String urlWithStrippedGet;
+                Log.d("WebView", "WebviewClient: it is a post request!");
+                String urlWithStrippedGet = url.toString();
+                int queryPart = urlWithStrippedGet.indexOf("?");
                 if (queryPart != -1)
-                    urlWithStrippedGet = url.toString().substring(0, queryPart);
-                else
-                    urlWithStrippedGet = url.toString();
+                    urlWithStrippedGet = urlWithStrippedGet.substring(0, queryPart);
 
                 HttpPost request1 = new HttpPost(urlWithStrippedGet);
                 UrlEncodedFormEntity params = Utils.get2post(url);
@@ -206,6 +205,7 @@ public class ProxyProcessor {
                     authCookie = val.trim();
                     CookieManager.put(MainContext, authCookie);
                     Log.d("WebView", "=== Auth cookie: ==='" + val + "'");
+                    Log.d("WebView", "redirecting to main page...");
                     //redirect does not work o_O
                     String msgText = "<script>window.location = \"http://rutracker.org/forum/index.php\"</script>";
                     ByteArrayInputStream msgStream = new ByteArrayInputStream(msgText.getBytes("UTF-8"));
@@ -215,13 +215,13 @@ public class ProxyProcessor {
             }
             int responseCode = response.getStatusLine().getStatusCode();
             String responseMessage = response.getStatusLine().getReasonPhrase();
-            if (responseCode == 302) {
+            /*if (responseCode == 302) {
                 Log.d("WebView", "It is redirect!");
                 Header[] locHeaders = response.getHeaders("location");
                 String newLocation = locHeaders[0].getValue();
                 Log.d("WebView", "going to " + newLocation);
                 return this.shouldInterceptRequest(view, newLocation);
-            }
+            }*/
 
             if (responseCode == 200) {
                 InputStream input = response.getEntity().getContent();
@@ -258,14 +258,20 @@ public class ProxyProcessor {
                 if (mime.equals("text/html") && Utils.is_rutracker(url)) {
                     encoding = "windows-1251";//for rutracker only
                     String data = Utils.convertStreamToString(inputStr, encoding);
-                    data = data.replace("method=\"post\"", "method=\"get\"");
+                    //data = data.replace("method=\"post\"", "method=\"get\"");
+                    String replace = "<form(.+?)method=\"post\"(.+?)>";
+                    String replacement = "<form$1method=\"get\"$2><input type=\"hidden\" name=\"convert_post\" value=1>";
+                    data = data.replaceAll(replace, replacement);
                     data = data.replace("</head>", "<link rel=\"stylesheet\" href=\"/custom.css\" type=\"text/css\"></head>");
                     //String cssData = Utils.convertStreamToString((MainContext).getAssets().open("rutracker.css"), "UTF-8");
                     //data = data.replace("</body>", "<style>" + cssData+"</style></body>");
                     inputStr = new ByteArrayInputStream(data.getBytes(encoding));
                     Log.d("WebView", "data " + data);
-
-                    String shareMsg = "Посмотри, что я нашёл на рутрекере при помощи приложения rutracker free: \n" + url.toString();
+                    String shareUrl = url.toString();
+                    int pos = shareUrl.indexOf("&login_username");
+                    if (pos != -1)
+                        shareUrl = shareUrl.substring(0, pos);
+                    String shareMsg = "Посмотри, что я нашёл на рутрекере при помощи приложения rutracker free: \n" + shareUrl;
                     int start = data.indexOf("href=\"magnet:");
                     if (start != -1) {
                         start += 13;

@@ -13,15 +13,24 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * Created by Bond on 2016-03-14.
  */
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+
 public class Utils {
 
     public static String md5(final String s) {
@@ -110,7 +119,18 @@ public class Utils {
         }
         return total.toString();
     }
-
+    public static Map<String, String> getQueryMap(String query)
+    {
+        String[] params = query.split("&");
+        Map<String, String> map = new HashMap<String, String>();
+        for (String param : params)
+        {
+            String name = param.split("=")[0];
+            String value = param.split("=")[1];
+            map.put(name, value);
+        }
+        return map;
+    }
     public static UrlEncodedFormEntity get2post(Uri url) {
         Set<String> params = url.getQueryParameterNames();
         if (params.isEmpty())
@@ -118,12 +138,24 @@ public class Utils {
 
         List<NameValuePair> paramsArray = new ArrayList<>();
 
-        for (String name : params) {
-            Log.d("Utils", "converting parameter " + name + " to post");
-            paramsArray.add(new BasicNameValuePair(name, url.getQueryParameter(name)));
+        Log.d("Utils", "Getting URL parameters from URL " + url.toString());
+        String urlStr= null;
+
+        Map<String, String> map=getQueryMap(url.toString());
+        for (Map.Entry<String, String> entry : map.entrySet())
+        {
+            String name=entry.getKey();
+            String value=entry.getValue();
+            try {
+                value = URLDecoder.decode(value, "windows-1251");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            Log.d("Utils", "converting parameter " + name + " to post, value " + value);
+            paramsArray.add(new BasicNameValuePair(name, value));
         }
         try {
-            return new UrlEncodedFormEntity(paramsArray, "UTF-8");
+            return new UrlEncodedFormEntity(paramsArray, "windows-1251");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
