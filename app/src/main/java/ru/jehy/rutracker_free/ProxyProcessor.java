@@ -20,21 +20,25 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnRoutePNames;
+//import org.apache.custom.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+//import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
+//import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.security.KeyStore;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -135,7 +139,43 @@ public class ProxyProcessor {
             HttpResponse response;
 
 
-            if (!url.toString().contains("convert_post=1") && !method.equals("post")) {
+            if (url.toString().contains("convert_post=1") || method.equals("post")) {
+                Log.d("WebView", "WebviewClient: it is a post request!");
+                String urlWithStrippedGet = url.toString();
+                int queryPart = urlWithStrippedGet.indexOf("?");
+                if (queryPart != -1)
+                    urlWithStrippedGet = urlWithStrippedGet.substring(0, queryPart);
+
+                HttpPost request1 = new HttpPost(urlWithStrippedGet);
+                UrlEncodedFormEntity params = Utils.get2post(url);
+                if (params != null)
+                    request1.setEntity(params);
+                if (headers != null)
+                    for (Map.Entry<String, String> entry : headers.entrySet())
+                        request1.setHeader(entry.getKey(), entry.getValue());
+                request1.setHeader(header[0], header[1]);
+                request1.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+                request1.setHeader("Accept-Encoding", "gzip, deflate, sdch");
+                request1.setHeader("Accept-Language", "ru,en-US;q=0.8,en;q=0.6");
+                if (authCookie != null && Utils.is_rutracker(url)) {
+                    request1.setHeader("Cookie", authCookie);
+                    Log.d("WebView", "cookie sent:" + authCookie);
+                }
+                request1.setHeader("Referer", "http://rutracker.org/forum/index.php");
+                request1.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36");
+
+
+                try {
+                    response = cli.execute(request1);
+                } catch (Exception e) {
+                    String msgText = "Что-то пошло не так:<br>Сообщение: " + e.getMessage() +
+                            "<br>Код: " +
+                            "Вы можете <a href=\"javascript:location.reload(true)\">Обновить страницу</a>" +
+                            "или <a href=\"http://rutracker.org/forum/index.php\">вернуться на главную</a>";
+                    ByteArrayInputStream msgStream = new ByteArrayInputStream(msgText.getBytes("UTF-8"));
+                    return new WebResourceResponse("text/html", "UTF-8", msgStream);
+                }
+            } else {
                 HttpGet request1 = new HttpGet(url.toString());
 
                 for (Map.Entry<String, String> entry : headers.entrySet())
@@ -163,32 +203,6 @@ public class ProxyProcessor {
                     return new WebResourceResponse("text/html", "UTF-8", msgStream);
                 }
 
-            } else {
-                Log.d("WebView", "WebviewClient: it is a post request!");
-                String urlWithStrippedGet = url.toString();
-                int queryPart = urlWithStrippedGet.indexOf("?");
-                if (queryPart != -1)
-                    urlWithStrippedGet = urlWithStrippedGet.substring(0, queryPart);
-
-                HttpPost request1 = new HttpPost(urlWithStrippedGet);
-                UrlEncodedFormEntity params = Utils.get2post(url);
-                if (params != null)
-                    request1.setEntity(params);
-                if (headers != null)
-                    for (Map.Entry<String, String> entry : headers.entrySet())
-                        request1.setHeader(entry.getKey(), entry.getValue());
-                request1.setHeader(header[0], header[1]);
-                request1.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
-                request1.setHeader("Accept-Encoding", "gzip, deflate, sdch");
-                request1.setHeader("Accept-Language", "ru,en-US;q=0.8,en;q=0.6");
-                if (authCookie != null && Utils.is_rutracker(url)) {
-                    request1.setHeader("Cookie", authCookie);
-                    Log.d("WebView", "cookie sent:" + authCookie);
-                }
-                request1.setHeader("Referer", "http://rutracker.org/forum/index.php");
-                request1.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36");
-
-                response = cli.execute(request1);
             }
 
             if (Utils.is_login_form(url)) {
