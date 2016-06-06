@@ -3,9 +3,9 @@ package ru.jehy.rutracker_free;
 import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.message.BasicNameValuePair;
+import cz.msebera.android.httpclient.NameValuePair;
+import cz.msebera.android.httpclient.client.entity.UrlEncodedFormEntity;
+import cz.msebera.android.httpclient.message.BasicNameValuePair;
 
 import android.net.Uri;
 
@@ -28,8 +28,8 @@ import java.util.Set;
 /**
  * Created by Bond on 2016-03-14.
  */
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
+import cz.msebera.android.httpclient.NameValuePair;
+import cz.msebera.android.httpclient.client.utils.URLEncodedUtils;
 
 public class Utils {
 

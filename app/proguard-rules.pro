@@ -17,10 +17,6 @@
 #}
 
 
--dontwarn org.apache.commons.**
--keep class org.apache.http.** { *; }
--dontwarn org.apache.http.**
-
 -dontwarn android.support.v4.**
 -keep class android.support.v4.** { *; }
 -dontwarn android.support.v7.**

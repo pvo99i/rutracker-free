@@ -1,6 +1,6 @@
 package ru.jehy.rutracker_free;
 
-import org.apache.http.conn.ssl.SSLSocketFactory;
+import cz.msebera.android.httpclient.conn.ssl.SSLSocketFactory;
 
 import java.io.IOException;
 import java.net.Socket;

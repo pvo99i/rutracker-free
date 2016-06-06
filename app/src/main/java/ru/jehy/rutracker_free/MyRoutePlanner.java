@@ -1,12 +1,12 @@
 package ru.jehy.rutracker_free;
 
-import org.apache.http.HttpException;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.conn.routing.HttpRoutePlanner;
-import org.apache.http.conn.routing.RouteInfo;
-import org.apache.http.protocol.HttpContext;
+import cz.msebera.android.httpclient.HttpException;
+import cz.msebera.android.httpclient.HttpHost;
+import cz.msebera.android.httpclient.HttpRequest;
+import cz.msebera.android.httpclient.conn.routing.HttpRoute;
+import cz.msebera.android.httpclient.conn.routing.HttpRoutePlanner;
+import cz.msebera.android.httpclient.conn.routing.RouteInfo;
+import cz.msebera.android.httpclient.protocol.HttpContext;
 
 /**
  * Created by Bond on 2016-03-11.
