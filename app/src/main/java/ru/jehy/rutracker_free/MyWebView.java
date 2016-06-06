@@ -1,7 +1,6 @@
 package ru.jehy.rutracker_free;
 
 import android.content.Context;
-import android.util.AttributeSet;
 import android.webkit.WebView;
 
 /**
@@ -12,6 +11,7 @@ public class MyWebView extends WebView {
     public MyWebView(Context context) {
         super(context);
     }
+
     @Override
     public void loadUrl(String url) {
         super.loadUrl(url);
@@ -23,4 +23,4 @@ public class MyWebView extends WebView {
         // fail, never works
         super.postUrl(url, postData);
     }
-};
+}

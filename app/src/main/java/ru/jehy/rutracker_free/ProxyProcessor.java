@@ -10,6 +10,13 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.util.Map;
+import java.util.zip.GZIPInputStream;
+
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.HttpHost;
 import cz.msebera.android.httpclient.HttpResponse;
@@ -20,36 +27,28 @@ import cz.msebera.android.httpclient.client.methods.HttpGet;
 import cz.msebera.android.httpclient.client.methods.HttpPost;
 import cz.msebera.android.httpclient.conn.ClientConnectionManager;
 import cz.msebera.android.httpclient.conn.params.ConnRoutePNames;
-//import org.apache.custom.http.conn.scheme.PlainSocketFactory;
 import cz.msebera.android.httpclient.conn.scheme.PlainSocketFactory;
 import cz.msebera.android.httpclient.conn.scheme.Scheme;
 import cz.msebera.android.httpclient.conn.scheme.SchemeRegistry;
 import cz.msebera.android.httpclient.conn.ssl.SSLSocketFactory;
-import cz.msebera.android.httpclient.impl.client.CloseableHttpClient;
-//import cz.msebera.android.httpclient.impl.client.DefaultHttpClient;
 import cz.msebera.android.httpclient.impl.client.DefaultHttpClient;
-import cz.msebera.android.httpclient.impl.client.HttpClients;
 import cz.msebera.android.httpclient.impl.conn.tsccm.ThreadSafeClientConnManager;
 import cz.msebera.android.httpclient.params.BasicHttpParams;
 import cz.msebera.android.httpclient.params.HttpParams;
 import cz.msebera.android.httpclient.params.HttpProtocolParams;
 import cz.msebera.android.httpclient.protocol.HTTP;
-//import cz.msebera.android.httpclient.impl.conn.tsccm.ThreadSafeClientConnManager;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.util.Map;
-import java.util.zip.GZIPInputStream;
+//import org.apache.custom.http.conn.scheme.PlainSocketFactory;
+//import cz.msebera.android.httpclient.impl.client.DefaultHttpClient;
+//import cz.msebera.android.httpclient.impl.conn.tsccm.ThreadSafeClientConnManager;
 
 /**
  * Created by jehy on 2016-03-31.
  */
 public class ProxyProcessor {
 
+    private final Context MainContext;
     private String authCookie = null;
-    private Context MainContext;
 
     public ProxyProcessor(Context c) {
         MainContext = c;

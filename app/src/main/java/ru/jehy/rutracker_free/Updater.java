@@ -1,10 +1,6 @@
 package ru.jehy.rutracker_free;
 
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -15,8 +11,6 @@ import java.net.URL;
  * Created by jehy on 2016-03-16.
  */
 class Updater extends AsyncTask<MainActivity, Void, Void> {
-
-    private Exception exception;
 
     protected Void doInBackground(MainActivity... activity) {
         checkUpdates(activity[0]);

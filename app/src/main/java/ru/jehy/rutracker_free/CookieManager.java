@@ -14,7 +14,7 @@ import android.util.Log;
  * Created by Bond on 01-Dec-15.
  */
 public class CookieManager {
-    public static String KEY = "cookie";
+    public static final String KEY = "cookie";
 
     static String get(Context mContext) {
         SharedPreferences settings = PreferenceManager

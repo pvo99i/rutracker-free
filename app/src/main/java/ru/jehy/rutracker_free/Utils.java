@@ -1,22 +1,15 @@
 package ru.jehy.rutracker_free;
 
+import android.net.Uri;
 import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
-import cz.msebera.android.httpclient.NameValuePair;
-import cz.msebera.android.httpclient.client.entity.UrlEncodedFormEntity;
-import cz.msebera.android.httpclient.message.BasicNameValuePair;
-
-import android.net.Uri;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -25,11 +18,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cz.msebera.android.httpclient.NameValuePair;
+import cz.msebera.android.httpclient.client.entity.UrlEncodedFormEntity;
+import cz.msebera.android.httpclient.message.BasicNameValuePair;
+
 /**
  * Created by Bond on 2016-03-14.
  */
-import cz.msebera.android.httpclient.NameValuePair;
-import cz.msebera.android.httpclient.client.utils.URLEncodedUtils;
 
 public class Utils {
 
@@ -111,9 +106,10 @@ public class Utils {
         StringBuilder total = new StringBuilder();
         String line;
         try {
-            while ((line = r.readLine()) != null) {
-                total.append("\n" + line);
-            }
+            if (r != null)
+                while ((line = r.readLine()) != null) {
+                    total.append("\n").append(line);
+                }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -131,6 +127,7 @@ public class Utils {
         return map;
     }
 
+    @SuppressWarnings("UnusedAssignment")
     public static UrlEncodedFormEntity get2post(Uri url) {
         Set<String> params = url.getQueryParameterNames();
         if (params.isEmpty())
@@ -139,7 +136,7 @@ public class Utils {
         List<NameValuePair> paramsArray = new ArrayList<>();
 
         Log.d("Utils", "Getting URL parameters from URL " + url.toString());
-        String urlStr = null;
+        //String urlStr = null;
 
         Map<String, String> map = getQueryMap(url.toString());
         for (Map.Entry<String, String> entry : map.entrySet()) {

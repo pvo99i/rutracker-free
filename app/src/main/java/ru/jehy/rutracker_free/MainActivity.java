@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -22,12 +21,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.RelativeLayout;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -44,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
                 builder.setMessage("Доступно обновление приложения rutracker free до версии " +
                         lastAppVersion + " - желаете обновиться? " +
                         "Если вы согласны - вы будете перенаправлены к скачиванию APK файла,"
-                        +" который затем нужно будет открыть.")
+                        + " который затем нужно будет открыть.")
                         .setCancelable(true)
                         .setPositiveButton("Да", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
